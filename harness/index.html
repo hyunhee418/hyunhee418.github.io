@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harness Engineering — Hyunhee Son</title>
+<meta name="description" content="A four-layer harness that constrains AI coding agents to an architectural standard: 46 predefined scenarios, model-agnostic entry points, and the measurement system that proved a 79.7% effort reduction.">
+<link rel="stylesheet" href="../css/site.css">
+</head>
+<body>
+
+<nav class="langswitch" aria-label="Language">
+  <button type="button" data-set-lang="en" aria-pressed="true">EN</button>
+  <button type="button" data-set-lang="ko" aria-pressed="false">KO</button>
+</nav>
+
+<div class="wrap">
+
+<div data-lang="en" class="is-active">
+
+  <header>
+    <a class="back" href="../">← Hyunhee Son</a>
+    <h1>Harness engineering</h1>
+    <p class="lede">Making an AI coding agent produce the architectural standard — not whatever it infers from a prompt.</p>
+    <p class="pagemeta">S2B national e-procurement rebuild · Architect team · presented May 2026</p>
+  </header>
+
+  <section>
+    <p class="label">Why</p>
+    <h2>An architect's standard only holds while a person is checking it</h2>
+    <p>On an SI program the architect's remit is clear enough: design the structure, define the standard, control quality in review, and get partner companies onboarded onto the same rules. The problem is that all four depend on people holding the line, and the same failures recur on every engagement.</p>
+    <div class="cards">
+      <div class="card"><h4>Uneven skill levels</h4><p>Senior, junior and outsourced developers read one standard and produce different code.</p></div>
+      <div class="card"><h4>Standards rebuilt every time</h4><p>Each new program redefines architecture, rules and templates from scratch, consuming architect time on work already done.</p></div>
+      <div class="card"><h4>Multi-vendor divergence</h4><p>Each participating company brings its own style and interpretation. The bill arrives at integration, as rework.</p></div>
+      <div class="card"><h4>Documented ≠ enforced</h4><p>A written standard still ends up validated by a senior reviewer in a pull request — a bottleneck, and an inconsistent one.</p></div>
+    </div>
+    <p style="margin-top:26px">AI made this worse before it made it better. An agent loses its memory between sessions, so the same request yields different code each time. Output tracks whoever wrote the prompt. And a rule the agent never reads is not a rule — you are back to a person checking every result.</p>
+  </section>
+
+  <section>
+    <p class="label">What it is</p>
+    <h2>Constraining the agent, not coaching it</h2>
+    <div class="pull"><p>Harness engineering: making the AI act only within rules and scenarios a person defined in advance, instead of judging for itself.</p></div>
+    <p>The unit of work is not a prompt. It is a harness — a structure that sits between the developer and the agent and decides what the agent is allowed to load, in what order, and what shape the output must take. Prompts vary; the harness does not. That is the whole point: <strong>the same request produces the same result regardless of who asked, how well they phrased it, or which model answered.</strong></p>
+  </section>
+
+  <section>
+    <p class="label">Structure</p>
+    <h2>Four layers, with explicit load boundaries</h2>
+    <p>The framework is implemented as a <code>.claude/</code> directory in every service. Each layer has a defined moment at which it is allowed to enter the context window — which is what keeps the agent accurate and the token cost sane.</p>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Loaded</th><th>Responsibility</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Entry point</strong><br><code>CLAUDE.md</code></td><td>Always resident</td><td>Detects what kind of input arrived — a table name, an HTML file, a spec document, plain language, a persona name — and routes it.</td></tr>
+          <tr><td><strong>Skills</strong></td><td>Always resident</td><td>Structure, naming, forbidden patterns, common-module usage. Kept under 150 lines each so residency stays cheap.</td></tr>
+          <tr><td><strong>Commands</strong></td><td>On call</td><td>46 predefined scenarios, each a step-by-step workflow. Collect conditions first, start building only once endpoint, parameters and logic are known.</td></tr>
+          <tr><td><strong>Reference</strong></td><td>Selectively</td><td>Verified example code, split per scenario. A simple query never pulls this in at all.</td></tr>
+          <tr><td><strong>Agents</strong></td><td>Per role</td><td>API, BFF, UI, review, test, report — isolated contexts, runnable in parallel.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:24px">Whatever changes — the coding agent, the developer's seniority, how the request is phrased, the business domain, a fresh session with no memory — the output does not: an API arrives as interfaces / application / domain / infrastructure with CQRS, DTOs and validation rules; a screen arrives as the standard seven-section JS structure with the prescribed common modules.</p>
+  </section>
+
+  <section>
+    <p class="label">How it runs</p>
+    <h2>One table name, six steps, a working API</h2>
+    <ol class="steps">
+      <li><span class="num">01</span><div>Developer types a table name — <code>SC_CODE</code>.</div></li>
+      <li><span class="num">02</span><div>The entry point recognises the input type against already-resident rules and routes to the CRUD scenario.</div></li>
+      <li><span class="num">03</span><div>That command loads and queries the database schema.</div></li>
+      <li><span class="num">04</span><div>Only the reference examples this scenario needs are pulled in.</div></li>
+      <li><span class="num">05</span><div>Role-isolated agents execute — API developer, then test runner.</div></li>
+      <li><span class="num">06</span><div>Out comes five CRUD APIs, JUnit tests, and the REST Docs specification.</div></li>
+    </ol>
+    <p style="margin-top:28px">Five input styles are supported, because developers should not have to learn a new way to ask:</p>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Input</th><th>Output</th></tr></thead>
+        <tbody>
+          <tr><td>A table name</td><td>5 CRUD APIs · JUnit tests · REST Docs</td></tr>
+          <tr><td>An HTML file</td><td>Standard seven-section JS · grid, form, popup · API wiring</td></tr>
+          <tr><td>A spec document</td><td>Business logic · validation rules · BFF and external integration</td></tr>
+          <tr><td>Plain language</td><td>Four-layer CQRS skeleton · backend module · package structure</td></tr>
+          <tr><td>A persona name</td><td>Matched specialist scenario, executed immediately</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">Design decisions</p>
+    <h2>Why it holds up</h2>
+    <p>The obvious implementation is a single instruction file. It fails in five specific ways, and each of the layer boundaries above exists to answer one of them.</p>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th></th><th>Single file</th><th>Four layers</th></tr></thead>
+        <tbody>
+          <tr><td>Load efficiency</td><td>Everything, every session — wasted tokens</td><td>Only what the task needs</td></tr>
+          <tr><td>Working context</td><td>All rules at once — the agent gets confused</td><td>Separated by task: API work sees API rules</td></tr>
+          <tr><td>Reference depth</td><td>Always consults everything</td><td>Simple queries never reach the reference layer</td></tr>
+          <tr><td>Use cases</td><td>Improvised — different answer each time</td><td>46 scenarios defined in advance</td></tr>
+          <tr><td>Errors &amp; isolated networks</td><td>Same mistake recurs; rewritten per tool</td><td>Failures accumulate as reference; swap the entry point</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cards" style="margin-top:34px">
+      <div class="card"><h4>Conditions before code</h4><p>Commands interrogate first. Nothing is generated until endpoint, parameters and logic are settled.</p></div>
+      <div class="card"><h4>Failures become assets</h4><p>Known issues are recorded permanently, so the same AI mistake does not return next session.</p></div>
+      <div class="card"><h4>Model independence</h4><p>Swap only the entry point and the same harness runs on Claude outside the client network and Qwen3 inside the air-gapped one.</p></div>
+      <div class="card"><h4>Portable by copy</h4><p>Copy one folder, rename domain and packages, and the harness works on a new engagement.</p></div>
+      <div class="card"><h4>Extensible without regression</h4><p>A new scenario means adding its own skill, command and reference files — existing scenarios are untouched.</p></div>
+      <div class="card"><h4>Roles run isolated</h4><p>Separate agents per role protect each other's context and can run in parallel.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">Proof</p>
+    <h2>A number that survives being challenged</h2>
+    <p>Claiming a productivity gain is easy and worth nothing. I built the measurement system to be attacked, and designed each part around a specific objection.</p>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>Objection</th><th>Design answer</th></tr></thead>
+        <tbody>
+          <tr><td>"You set a baseline that flattered you."</td><td>The baseline is the PM-approved WBS — 1,032 items, 3,450 planned man-days. Not an estimate of mine.</td></tr>
+          <tr><td>"Developers self-reported this."</td><td>No self-reporting. Effort is collected from tool hooks, with idle gaps over 15 minutes excluded and a 30% overhead factor added back for work outside the session.</td></tr>
+          <tr><td>"You counted work that already existed."</td><td>Every artifact is attributed to the commit that introduced it, verified through git history. 466 pre-existing artifacts were excluded automatically.</td></tr>
+          <tr><td>"That percentage is not credible."</td><td>Per-item savings are capped at 80% before reporting. The raw values are retained but not claimed.</td></tr>
+          <tr><td>"This measures your team, individually."</td><td>Developer identifiers are anonymized at collection. The system reports on the framework, not on people.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pull" style="margin-top:32px"><p><strong>79.7% effort reduction</strong> — 82 planned man-days delivered in 16.7, across 22 verified deliverables measured so far.</p></div>
+    <p>The scope is stated deliberately: 82 of the program's 3,450 planned man-days have been measured to date. Presenting a partial, verifiable number is worth more than a total, arguable one.</p>
+  </section>
+
+  <section>
+    <p class="label">Outcome</p>
+    <h2>From documentation to system control</h2>
+    <p>The framework received a company-wide <strong>AI Innovation Award</strong> and was presented at the Shinsegae Group IT innovation forum and to the CEO as a candidate group-wide standard. What made it worth presenting was not the automation but the shift underneath it.</p>
+    <div class="pull"><p>The architect used to write the standard, argue for it, and verify it in every pull request. Now the system enforces it, and the architect designs the system.</p></div>
+    <p>The practical consequences: standards became a transferable asset rather than a per-project rediscovery; senior reviewers stopped being the enforcement mechanism; and the same harness keeps working when the model, the network, or the people change.</p>
+  </section>
+
+  <section>
+    <p class="label">Appendix</p>
+    <h2>The 46 scenarios</h2>
+    <div class="uselist">
+      <div><h4>API — 10</h4><ol><li>CRUD, schema auto-detected</li><li>CRUD from supplied DDL</li><li>Single, database read</li><li>Single, one external API</li><li>Single, several external APIs combined</li><li>Single, database plus external</li><li>BFF, screen-optimized</li><li>Redis cache / draft storage</li><li>Modify, by endpoint</li><li>Modify, by file name</li></ol></div>
+      <div><h4>Spec-driven — 8</h4><ol><li>api-crud</li><li>api-single</li><li>api-bff</li><li>api-modify</li><li>api-sync</li><li>ui</li><li>ui-modify</li><li>ui-sync</li></ol></div>
+      <div><h4>Test — 4</h4><ol><li>HTTP file API test</li><li>JUnit controller generation</li><li>REST Docs to HTML</li><li>Playwright end-to-end</li></ol></div>
+      <div><h4>UI — 7</h4><ol><li>Admin single page, markup supplied</li><li>Board, multi-page</li><li>Grid-based screen</li><li>Screen with file upload</li><li>New screen, no markup</li><li>DOM-builder dynamic screen</li><li>Existing screen, modify mode</li></ol></div>
+      <div><h4>Project init — 17</h4><ol><li>Full project structure</li><li>Directory structure</li><li>Package structure</li><li>Core common modules</li><li>Security module</li><li>Configuration files</li><li>Web config</li><li>File module</li><li>Frontend base</li><li>API module</li><li>Form module</li><li>Grid module</li><li>Feedback module</li><li>Handler module</li><li>Popup module</li><li>Date picker module</li><li>File upload module</li></ol></div>
+    </div>
+    <p style="margin-top:30px">Twelve named personas sit on top of these, each activating a scenario by name with its own tone — because a developer typing <code>Rex SC_CODE</code> is more likely to use the harness than one recalling a command path. Adoption is a design problem too.</p>
+  </section>
+
+  <footer>
+    <p><a href="../">← Back to hyunhee418.github.io</a></p>
+  </footer>
+
+</div>
+
+<div data-lang="ko">
+
+  <header>
+    <a class="back" href="../">← 손현희</a>
+    <h1>하네스 엔지니어링</h1>
+    <p class="lede">AI가 프롬프트를 보고 알아서 판단하는 게 아니라, 정해진 아키텍처 표준대로만 만들게 하는 일.</p>
+    <p class="pagemeta">S2B 전자조달 재구축 · 아키텍트팀 · 2026.05 발표</p>
+  </header>
+
+  <section>
+    <p class="label">배경</p>
+    <h2>아키텍트의 표준은 사람이 지켜보는 동안만 유효합니다</h2>
+    <p>SI 사업에서 AA의 역할은 분명합니다. 시스템 구조를 설계하고, 개발 표준을 정의하고, 릴리즈 전에 품질을 통제하고, 협력사에 같은 표준을 전파합니다. 문제는 네 가지 모두 사람이 매번 보장하는 방식이라는 것이고, 그래서 사업마다 같은 문제가 반복됩니다.</p>
+    <div class="cards">
+      <div class="card"><h4>개발 인력 수준 편차</h4><p>시니어·신입·외주가 같은 표준을 다르게 해석해 코드 품질 차이가 상존합니다.</p></div>
+      <div class="card"><h4>사업별 표준 재수립</h4><p>신규 사업마다 아키텍처·규칙·템플릿을 처음부터 정의합니다. 이미 한 일에 AA 인력이 반복 투입됩니다.</p></div>
+      <div class="card"><h4>협력사 결과물 편차</h4><p>참여 회사마다 스타일과 해석이 다릅니다. 청구서는 통합 단계에서 재작업으로 돌아옵니다.</p></div>
+      <div class="card"><h4>문서화된 표준의 한계</h4><p>문서로 정의해도 결국 시니어의 PR 검증에 의존합니다. 병목이 되고, 일관성도 보장되지 않습니다.</p></div>
+    </div>
+    <p style="margin-top:26px">AI는 이 문제를 먼저 키웠습니다. 매 세션 기억을 잃기 때문에 같은 요청에도 매번 다른 결과가 나오고, 결과는 프롬프트를 쓴 사람의 실력을 따라갑니다. 그리고 AI가 읽지 않는 규칙은 규칙이 아닙니다. 다시 사람이 매번 확인하는 자리로 돌아옵니다.</p>
+  </section>
+
+  <section>
+    <p class="label">정의</p>
+    <h2>AI를 가르치는 게 아니라 묶는 것</h2>
+    <div class="pull"><p>하네스 엔지니어링 — AI가 자기 마음대로 판단하지 않고, 사람이 미리 정해둔 규칙과 시나리오대로만 동작하도록 만드는 기술.</p></div>
+    <p>작업의 단위는 프롬프트가 아닙니다. 개발자와 AI 사이에 놓여서, AI가 무엇을 어떤 순서로 읽을 수 있고 결과물이 어떤 모양이어야 하는지를 결정하는 구조입니다. 프롬프트는 사람마다 다르지만 하네스는 다르지 않습니다. 그게 핵심입니다. <strong>누가 요청해도, 어떻게 표현해도, 어떤 모델이 답해도 같은 결과가 나옵니다.</strong></p>
+  </section>
+
+  <section>
+    <p class="label">구조</p>
+    <h2>로드 경계를 명확히 나눈 4계층</h2>
+    <p>각 서비스의 <code>.claude/</code> 디렉토리로 구현했습니다. 계층마다 컨텍스트에 들어올 수 있는 시점이 정해져 있고, 이 경계가 AI의 정확도와 토큰 비용을 동시에 지켜줍니다.</p>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>계층</th><th>로드 시점</th><th>역할</th></tr></thead>
+        <tbody>
+          <tr><td><strong>진입점</strong><br><code>CLAUDE.md</code></td><td>항상 상주</td><td>입력 유형을 자동 감지해 분기합니다. 테이블명·HTML·스펙 문서·자연어·페르소나 이름.</td></tr>
+          <tr><td><strong>Skills</strong></td><td>항상 상주</td><td>구조·명명 규칙·금지 패턴·공통 모듈 사용법. 상주 비용을 낮추기 위해 각 150줄 이내로 유지합니다.</td></tr>
+          <tr><td><strong>Commands</strong></td><td>호출 시</td><td>46개 시나리오. 각각 Step-by-Step 워크플로우이며, 엔드포인트·파라미터·로직이 모이기 전까지 개발에 착수하지 않습니다.</td></tr>
+          <tr><td><strong>Reference</strong></td><td>선택적</td><td>검증된 예시 코드를 시나리오별로 분리해 둡니다. 단순 질의는 여기까지 오지 않습니다.</td></tr>
+          <tr><td><strong>Agents</strong></td><td>역할별</td><td>API·BFF·UI·리뷰·테스트·리포트. 컨텍스트를 격리해 병렬 실행합니다.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:24px">무엇이 바뀌어도 — Code Agent가 교체되어도, 시니어에서 신입으로 바뀌어도, 호출 방식이 달라져도, 도메인이 추가되어도, 새 세션으로 기억이 초기화되어도 — 결과물은 같습니다. API는 interfaces / application / domain / infrastructure에 CQRS·DTO·검증 규칙까지, 화면은 7섹션 표준 JS 구조에 정해진 공통 모듈 사용법까지.</p>
+  </section>
+
+  <section>
+    <p class="label">작동</p>
+    <h2>테이블명 하나, 6단계, 동작하는 API</h2>
+    <ol class="steps">
+      <li><span class="num">01</span><div>개발자가 테이블명을 입력합니다 — <code>SC_CODE</code>.</div></li>
+      <li><span class="num">02</span><div>진입점이 이미 로드된 규칙으로 입력 유형을 판별하고 CRUD 시나리오로 분기합니다.</div></li>
+      <li><span class="num">03</span><div>해당 Command가 로드되어 DB 스키마를 조회합니다.</div></li>
+      <li><span class="num">04</span><div>이 시나리오에 필요한 Reference 예시만 선택적으로 로드합니다.</div></li>
+      <li><span class="num">05</span><div>역할별로 격리된 Agent가 실행됩니다 — api-developer, 이어서 test-runner.</div></li>
+      <li><span class="num">06</span><div>CRUD API 5개, JUnit 테스트, REST Docs 명세가 산출됩니다.</div></li>
+    </ol>
+    <p style="margin-top:28px">입력 방식은 다섯 가지를 지원합니다. 개발자가 새로운 요청 방법을 배워야 할 이유는 없기 때문입니다.</p>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>입력</th><th>결과</th></tr></thead>
+        <tbody>
+          <tr><td>테이블명</td><td>CRUD API 5개 · JUnit 테스트 · REST Docs</td></tr>
+          <tr><td>HTML 파일</td><td>7섹션 표준 JS · 그리드·폼·팝업 · API 연결</td></tr>
+          <tr><td>스펙 문서</td><td>비즈니스 로직 · 검증 규칙 · BFF·외부 연계</td></tr>
+          <tr><td>자연어 요청</td><td>4-Layer CQRS 골격 · 백엔드 모듈 · 패키지 구조</td></tr>
+          <tr><td>페르소나 이름</td><td>전문 시나리오 매칭 후 즉시 실행</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">설계 결정</p>
+    <h2>왜 이 구조가 버티는가</h2>
+    <p>가장 쉬운 구현은 지시사항을 파일 하나에 몰아넣는 것입니다. 그 방식은 다섯 가지 지점에서 무너지고, 위의 계층 경계는 각각 그중 하나에 대한 답입니다.</p>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th></th><th>단일 파일</th><th>4계층 분리</th></tr></thead>
+        <tbody>
+          <tr><td>로드 효율</td><td>매 세션 전체 로드 → 토큰 낭비</td><td>필요한 항목만 선택 로드</td></tr>
+          <tr><td>작업 컨텍스트</td><td>모든 규칙이 한 컨텍스트 → AI 혼동</td><td>작업별 분리 — API 작업엔 API 규칙</td></tr>
+          <tr><td>참조 깊이</td><td>항상 모든 정보 참조</td><td>단순 질의는 Reference까지 오지 않음</td></tr>
+          <tr><td>유즈케이스</td><td>즉흥 응답 — 매번 결과 상이</td><td>46개 시나리오 사전 정의</td></tr>
+          <tr><td>오류·망분리</td><td>동일 오류 반복 · 도구별 재작성</td><td>오류는 누적 자산화 · 진입점만 교체</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cards" style="margin-top:34px">
+      <div class="card"><h4>조건 수집 후 착수</h4><p>Command가 먼저 질의합니다. 엔드포인트·파라미터·로직이 모이기 전에는 아무것도 생성하지 않습니다.</p></div>
+      <div class="card"><h4>오류의 자산화</h4><p>Known Issues를 영구 기록해, 같은 AI 실수가 다음 세션에 재발하지 않습니다.</p></div>
+      <div class="card"><h4>도구 독립성</h4><p>진입점만 교체하면 외부망 Claude와 내부망 Qwen3에서 같은 하네스가 동작합니다.</p></div>
+      <div class="card"><h4>복사로 이식</h4><p>폴더 하나를 복사하고 도메인·패키지명만 바꾸면 신규 사업에서 작동합니다.</p></div>
+      <div class="card"><h4>영향 없는 확장</h4><p>신규 시나리오는 해당 Skill·Command·Reference 파일만 추가합니다. 기존 시나리오는 건드리지 않습니다.</p></div>
+      <div class="card"><h4>역할별 격리 실행</h4><p>역할마다 Agent를 분리해 서로의 컨텍스트를 보호하고 병렬로 실행합니다.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">증명</p>
+    <h2>공격받아도 남는 숫자</h2>
+    <p>생산성이 올랐다고 주장하는 건 쉽고 아무 가치가 없습니다. 그래서 측정 체계를 공격받는 것을 전제로 만들었고, 각 부분을 특정 반박에 대한 답으로 설계했습니다.</p>
+    <div class="tblwrap">
+      <table>
+        <thead><tr><th>예상 반박</th><th>설계로 준비한 답</th></tr></thead>
+        <tbody>
+          <tr><td>"기준공수를 유리하게 잡았지."</td><td>기준선은 PM이 승인한 WBS입니다. 1,032건, 계획 3,450MD. 제 추정치가 아닙니다.</td></tr>
+          <tr><td>"개발자가 자기신고한 거잖아."</td><td>자기신고가 없습니다. Hook으로 자동 수집하고, 15분 넘는 유휴 구간은 계상하지 않으며, 세션 밖 부대공수는 30% 가산합니다.</td></tr>
+          <tr><td>"원래 있던 걸 실적에 넣었잖아."</td><td>모든 산출물을 그것이 처음 도입된 커밋에 귀속시켜 git 이력으로 검증합니다. 기존 산출물 466건은 자동 배제되었습니다.</td></tr>
+          <tr><td>"그 절감률은 못 믿겠다."</td><td>건당 80% 상한으로 절사한 뒤 보고합니다. 원값은 보존하되 주장하지 않습니다.</td></tr>
+          <tr><td>"팀원 개인 평가에 쓰이는 거 아니냐."</td><td>수집 시점에 식별자를 익명 처리합니다. 이 체계는 프레임워크를 측정하고 사람을 측정하지 않습니다.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pull" style="margin-top:32px"><p><strong>공수 79.7% 절감</strong> — 계획 82MD를 16.7MD로. 현재까지 검증된 산출물 22건 기준입니다.</p></div>
+    <p>범위를 일부러 밝혀 둡니다. 사업 전체 계획 3,450MD 중 82MD가 지금까지 측정된 분량입니다. 전체를 말하는 논쟁적인 숫자보다, 일부를 말하는 검증 가능한 숫자가 낫습니다.</p>
+  </section>
+
+  <section>
+    <p class="label">결과</p>
+    <h2>문서화에서 시스템 통제로</h2>
+    <p>이 프레임워크로 <strong>전사 AI 혁신상</strong>을 받았고, 신세계그룹 IT 혁신 포럼과 CEO 대상 발표에 그룹 표준 후보로 제안되었습니다. 발표할 가치가 있었던 건 자동화 자체가 아니라 그 아래의 변화였습니다.</p>
+    <div class="pull"><p>예전의 AA는 표준을 쓰고, 설득하고, 매 PR에서 확인했습니다. 이제는 시스템이 표준을 강제하고, AA는 그 시스템을 설계합니다.</p></div>
+    <p>실질적인 결과는 세 가지입니다. 표준이 사업마다 다시 발견하는 것에서 이전 가능한 자산이 되었고, 시니어가 더는 강제 수단이 아니게 되었으며, 모델과 망과 사람이 바뀌어도 같은 하네스가 계속 동작합니다.</p>
+  </section>
+
+  <section>
+    <p class="label">별첨</p>
+    <h2>46개 시나리오</h2>
+    <div class="uselist">
+      <div><h4>API — 10</h4><ol><li>CRUD — 스키마 자동 파악</li><li>CRUD — DDL 직접 입력</li><li>Single — DB 조회</li><li>Single — 외부 API 단일</li><li>Single — 외부 API 복수 조합</li><li>Single — DB + 외부 혼합</li><li>BFF — 화면 최적화</li><li>Redis — 캐시·임시저장</li><li>수정 — 엔드포인트 기반</li><li>수정 — 파일명 기반</li></ol></div>
+      <div><h4>SDD — 8</h4><ol><li>spec:api-crud</li><li>spec:api-single</li><li>spec:api-bff</li><li>spec:api-modify</li><li>spec:api-sync</li><li>spec:ui</li><li>spec:ui-modify</li><li>spec:ui-sync</li></ol></div>
+      <div><h4>테스트 — 4</h4><ol><li>HTTP 파일 API 테스트</li><li>JUnit Controller 자동 생성</li><li>REST Docs → HTML 빌드</li><li>Playwright E2E</li></ol></div>
+      <div><h4>UI — 7</h4><ol><li>관리자 단일 페이지 (퍼블 有)</li><li>게시판 멀티페이지</li><li>AUIGrid 기반 화면</li><li>파일 업로드 포함 화면</li><li>신규 (퍼블 無)</li><li>DOM Builder 동적 화면</li><li>기존 화면 수정 모드</li></ol></div>
+      <div><h4>프로젝트 초기화 — 17</h4><ol><li>전체 프로젝트 구조</li><li>디렉토리 구조</li><li>패키지 구조</li><li>Core 공통 모듈</li><li>보안 모듈</li><li>설정 파일</li><li>Web Config</li><li>File 모듈</li><li>Frontend 기본</li><li>API 모듈</li><li>Form 모듈</li><li>Grid 모듈</li><li>Feedback 모듈</li><li>Handler 모듈</li><li>Popup 모듈</li><li>DatePicker 모듈</li><li>FileUpload 모듈</li></ol></div>
+    </div>
+    <p style="margin-top:30px">그 위에 12명의 페르소나를 두었습니다. 이름 한 번으로 해당 시나리오가 활성화되고 각자 다른 말투를 가집니다. <code>Rex SC_CODE</code>라고 치는 개발자가 명령어 경로를 기억해야 하는 개발자보다 하네스를 실제로 씁니다. 채택률도 설계의 문제입니다.</p>
+  </section>
+
+  <footer>
+    <p><a href="../">← hyunhee418.github.io로 돌아가기</a></p>
+  </footer>
+
+</div>
+
+</div>
+
+<script>
+(function () {
+  var buttons = document.querySelectorAll('[data-set-lang]');
+  var blocks = document.querySelectorAll('[data-lang]');
+  var titles = { en: 'Harness Engineering — Hyunhee Son', ko: '하네스 엔지니어링 — 손현희' };
+
+  function apply(lang, remember) {
+    if (lang !== 'ko') lang = 'en';
+    blocks.forEach(function (b) { b.classList.toggle('is-active', b.dataset.lang === lang); });
+    buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.setLang === lang)); });
+    document.documentElement.lang = lang;
+    document.title = titles[lang];
+    if (remember) {
+      try { localStorage.setItem('lang', lang); } catch (e) {}
+      history.replaceState(null, '', lang === 'ko' ? '#ko' : location.pathname);
+    }
+  }
+
+  function initial() {
+    if (location.hash === '#ko') return 'ko';
+    if (location.hash === '#en') return 'en';
+    try { var s = localStorage.getItem('lang'); if (s) return s; } catch (e) {}
+    return (navigator.language || '').toLowerCase().indexOf('ko') === 0 ? 'ko' : 'en';
+  }
+
+  buttons.forEach(function (b) {
+    b.addEventListener('click', function () { apply(b.dataset.setLang, true); });
+  });
+
+  apply(initial(), false);
+})();
+</script>
+
+</body>
+</html>
