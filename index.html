@@ -35,7 +35,7 @@
     <h2>S2B — Korea's national e-procurement platform, rebuilt</h2>
     <p class="muted">Application Architect · Nov 2025 – present · Shinsegae I&amp;C for Korea Teachers' Credit Union</p>
     <p>Every K-12 school and education office in Korea buys through S2B. It is being rebuilt from the ground up on a private cloud over 18 months, by a multi-vendor organization of 59 contributors across 8 repositories.</p>
-    <p>I own the application architecture for its seven microservices — the layered structure, the business package taxonomy, BFF query patterns, the exception contract, and how services talk to each other and to external government systems. I also designed the target architecture in the bid proposal that won the program, so the architecture that was promised to the client is the one being built.</p>
+    <p>I am one of four application architects on the program, and the architectural standard is mine to own across all seven services — the layered structure, the business package taxonomy, BFF query patterns, the exception contract, and how services talk to each other and to external government systems. I also designed the target architecture in the bid proposal that won the program, so the architecture that was promised to the client is the one being built.</p>
   </section>
 
   <section>
@@ -47,7 +47,7 @@
         <p class="meta">S2B · ArchUnit, authoring-time hooks, 107 reference documents</p>
         <dl>
           <dt>Problem</dt>
-          <dd>One architect cannot review 59 people's code. Standards that live only in documents are found to be broken in review — when the cost of fixing them is already high.</dd>
+          <dd>Four architects cannot review 59 people's code. Standards that live only in documents are found to be broken in review — when the cost of fixing them is already high.</dd>
           <dt>Approach</dt>
           <dd>Move the control point to the moment code is written. I wrote the ArchUnit <code>ArchitectureTest</code> suites for all seven services (45–49 rules each) so layering, package, and naming rules fail as tests, and deployed hooks that surface the governing standard the instant a file is edited. Shared foundation code stays under change control and is updated centrally.</dd>
           <dt>Result</dt>
@@ -199,7 +199,7 @@
     <h2>S2B — 전국 학교가 쓰는 전자조달 플랫폼 재구축</h2>
     <p class="muted">Application Architect · 2025.11 – 현재 · 신세계아이앤씨 / 한국교직원공제회</p>
     <p>전국의 모든 초·중·고와 교육기관이 S2B를 통해 물품을 구매합니다. 이 시스템을 18개월에 걸쳐 프라이빗 클라우드 기반으로 전면 재구축하는 사업이고, 8개 저장소에 59명이 다벤더로 참여합니다.</p>
-    <p>저는 7개 마이크로서비스의 애플리케이션 아키텍처를 담당합니다. 계층 구조, 업무 패키지 체계, BFF 조회 패턴, 예외 처리 규약, 그리고 서비스 간·대외기관 연계 방식을 정의합니다. 이 사업의 제안 단계에서 목표 아키텍처를 설계해 수주까지 이어졌기 때문에, 고객에게 약속한 아키텍처를 제가 그대로 구현하고 있습니다.</p>
+    <p>이 사업에는 네 명의 애플리케이션 아키텍트가 있고, 그중 저는 7개 서비스를 가로지르는 아키텍처 표준을 담당합니다. 계층 구조, 업무 패키지 체계, BFF 조회 패턴, 예외 처리 규약, 그리고 서비스 간·대외기관 연계 방식을 정의합니다. 이 사업의 제안 단계에서 목표 아키텍처를 설계해 수주까지 이어졌기 때문에, 고객에게 약속한 아키텍처를 제가 그대로 구현하고 있습니다.</p>
   </section>
 
   <section>
@@ -211,7 +211,7 @@
         <p class="meta">S2B · ArchUnit, 작성 시점 Hook, 표준 문서 107건</p>
         <dl>
           <dt>문제</dt>
-          <dd>아키텍트 한 명이 59명의 코드를 리뷰할 수는 없습니다. 문서로만 존재하는 표준은 리뷰 시점에야 위반이 발견되고, 그때는 이미 수정 비용이 큽니다.</dd>
+          <dd>아키텍트 네 명이 59명의 코드를 전부 리뷰할 수는 없습니다. 문서로만 존재하는 표준은 리뷰 시점에야 위반이 발견되고, 그때는 이미 수정 비용이 큽니다.</dd>
           <dt>접근</dt>
           <dd>통제 지점을 코드가 작성되는 순간으로 옮겼습니다. 7개 서비스 전체의 ArchUnit <code>ArchitectureTest</code>를 직접 작성해(서비스당 45~49개 규칙) 계층 의존·패키지·명명 규칙이 테스트로 실패하게 만들고, 파일을 편집하는 즉시 해당 표준을 제시하는 Hook을 배포했습니다. 공통 기반 코드는 변경 통제 대상으로 두고 중앙에서 일괄 적용합니다.</dd>
           <dt>결과</dt>
